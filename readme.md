@@ -1,9 +1,9 @@
-#Crc16 A simple crc-16 library for Arduino
+# Crc16 A simple crc-16 library for Arduino
 
-##Description
+## Description
 Use this library to implement crc checks on buffer arrays
 
-##Usage
+## Usage
 There are two modes to calculate crc: incremental and single call:
 * In first mode the crc is calculated adding data bytes one by one and then calculating final crc, this is useful
 for reception routines that receives bytes asynchrously,
