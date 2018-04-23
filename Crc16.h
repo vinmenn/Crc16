@@ -31,8 +31,10 @@
 
 #if defined(ARDUINO) && ARDUINO >= 100
   #include "Arduino.h"
-#else
+#elif defined(ARDUINO)
   #include "WProgram.h"
+#else
+  #include <cstdint>
 #endif
 
 class Crc16 {
