@@ -14,6 +14,8 @@ updateCrc	KEYWORD2
 getCrc	KEYWORD2
 fastCrc	KEYWORD2
 XModemCrc	KEYWORD2
+Mcrf4XX	KEYWORD2
+Modbus	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
