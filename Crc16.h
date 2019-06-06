@@ -5,6 +5,8 @@
 // History
 //  0.1.0 31/05/2014:   First public code release
 //  0.1.1 17/12/2014:   Minor revision and commented code
+//  0.1.2 06/06/2019:   Fix reflect routine for 16 bit data
+//                      Added ModBus and Mcrf4XX inline functions
 //
 // License
 // "MIT Open Source Software License":
@@ -27,7 +29,7 @@
 //-------------------------------------------------------------------------------------
 #ifndef CRC16_H
 #define CRC16_H
-#define LIBRARY_VERSION_CRC16_H   "0.1.1"
+#define LIBRARY_VERSION_CRC16_H   "0.1.2"
 
 #if defined(ARDUINO) && ARDUINO >= 100
   #include "Arduino.h"
@@ -48,8 +50,9 @@ class Crc16 {
         uint8_t _reflectIn;
         uint8_t _reflectOut;
         //Crc value
-		uint16_t _crc;
-		uint8_t reflect(uint8_t data, uint8_t bits = 32);
+        uint16_t _crc;
+        uint8_t reflect(uint8_t data);
+        uint16_t reflect(uint16_t data);
 
    public:
         inline Crc16()
@@ -84,6 +87,14 @@ class Crc16 {
             //  XModem parameters: poly=0x1021 init=0x0000 refin=false refout=false xorout=0x0000
             return fastCrc(data, start, length, false, false, 0x1021, 0x0000, 0x0000, 0x8000, 0xffff);
 		}
+        inline unsigned int Mcrf4XX(uint8_t data[], uint8_t start, uint16_t length)
+        {
+          return fastCrc(data, start, length, true, true, 0x1021, 0xffff, 0x0000, 0x8000, 0xffff);
+        }
+        inline unsigned int Modbus(uint8_t data[], uint8_t start, uint16_t length)
+        {
+          return fastCrc(data, start, length, true, true, 0x8005, 0xffff, 0x0000, 0x8000, 0xffff);
+        }
 };
 
 //---------------------------------------------------
@@ -99,7 +110,7 @@ void Crc16::clearCrc()
 void Crc16::updateCrc(uint8_t data)
 {
 	if (_reflectIn != 0)
-		data = (uint8_t) reflect(data, 8);
+		data = (uint8_t) reflect(data);
 
 	int j = 0x80;
 
@@ -144,7 +155,7 @@ uint16_t Crc16::getCrc()
 //---------------------------------------------------
 unsigned int Crc16::fastCrc(uint8_t data[], uint8_t start, uint16_t length, uint8_t reflectIn, uint8_t reflectOut, uint16_t polynomial, uint16_t xorIn, uint16_t xorOut, uint16_t msbMask, uint16_t mask)
 {
-	unsigned int crc = xorIn;
+  uint16_t crc = xorIn;
 
 	int j;
 	uint8_t c;
@@ -157,7 +168,7 @@ unsigned int Crc16::fastCrc(uint8_t data[], uint8_t start, uint16_t length, uint
 		c = data[i];
 
 		if (reflectIn != 0)
-			c = (uint8_t) reflect(c, 8);
+			c = (uint8_t) reflect(c);
 
 		j = 0x80;
 
@@ -180,8 +191,8 @@ unsigned int Crc16::fastCrc(uint8_t data[], uint8_t start, uint16_t length, uint
 		}
 	}
 
-	if (reflectOut != 0)
-		crc = (unsigned int)((reflect(crc) ^ xorOut) & mask);
+  if (reflectOut != 0)
+    crc = (unsigned int)((reflect((uint16_t) crc) ^ xorOut) & mask);
 
 	return crc;
 }
@@ -189,8 +200,9 @@ unsigned int Crc16::fastCrc(uint8_t data[], uint8_t start, uint16_t length, uint
 //-------------------------------------------------------
 // Reflects bit in a uint8_t
 //-------------------------------------------------------
-uint8_t Crc16::reflect(uint8_t data, uint8_t bits)
+uint8_t Crc16::reflect(uint8_t data)
 {
+  const uint8_t bits = 8;
 	unsigned long reflection = 0x00000000;
 	// Reflect the data about the center bit.
 	for (uint8_t bit = 0; bit < bits; bit++)
@@ -206,4 +218,26 @@ uint8_t Crc16::reflect(uint8_t data, uint8_t bits)
 
 	return reflection;
 }
+//-------------------------------------------------------
+// Reflects bit in a uint16_t
+//-------------------------------------------------------
+uint16_t Crc16::reflect(uint16_t data)
+{
+  const uint8_t bits = 16;
+  unsigned long reflection = 0x00000000;
+  // Reflect the data about the center bit.
+  for (uint8_t bit = 0; bit < bits; bit++)
+  {
+    // If the LSB bit is set, set the reflection of it.
+    if ((data & 0x01) != 0)
+    {
+      reflection |= (unsigned long)(1 << ((bits - 1) - bit));
+    }
+
+    data = (uint16_t)(data >> 1);
+  }
+
+  return reflection;
+}
+
 #endif
