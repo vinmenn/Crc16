@@ -145,3 +145,19 @@ uint16_t Crc16::reflect(uint16_t data)
 
     return reflection;
 }
+
+unsigned int Crc16::XModemCrc(uint8_t data[], uint8_t start, uint16_t length)
+{
+    //  XModem parameters: poly=0x1021 init=0x0000 refin=false refout=false xorout=0x0000
+    return fastCrc(data, start, length, false, false, 0x1021, 0x0000, 0x0000, 0x8000, 0xffff);
+}
+
+unsigned int Crc16::Mcrf4XX(uint8_t data[], uint8_t start, uint16_t length)
+{
+    return fastCrc(data, start, length, true, true, 0x1021, 0xffff, 0x0000, 0x8000, 0xffff);
+}
+
+unsigned int Crc16::Modbus(uint8_t data[], uint8_t start, uint16_t length)
+{
+    return fastCrc(data, start, length, true, true, 0x8005, 0xffff, 0x0000, 0x8000, 0xffff);
+}

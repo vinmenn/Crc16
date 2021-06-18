@@ -57,7 +57,7 @@ private:
     uint16_t reflect(uint16_t data);
 
 public:
-    inline Crc16()
+    Crc16()
     {
         //Default to XModem parameters
         _reflectIn = false;
@@ -69,7 +69,8 @@ public:
         _mask = 0xFFFF;
         _crc = _xorIn;
     }
-    inline Crc16(uint8_t reflectIn, uint8_t reflectOut, uint16_t polynomial, uint16_t xorIn, uint16_t xorOut, uint16_t msbMask, uint16_t mask)
+
+    Crc16(uint8_t reflectIn, uint8_t reflectOut, uint16_t polynomial, uint16_t xorIn, uint16_t xorOut, uint16_t msbMask, uint16_t mask)
     {
         _reflectIn = reflectIn;
         _reflectOut = reflectOut;
@@ -80,23 +81,14 @@ public:
         _mask = mask;
         _crc = _xorIn;
     }
-    inline void clearCrc();
-    inline void updateCrc(uint8_t data);
-    inline uint16_t getCrc();
-    inline unsigned int fastCrc(uint8_t data[], uint8_t start, uint16_t length, uint8_t reflectIn, uint8_t reflectOut, uint16_t polynomial, uint16_t xorIn, uint16_t xorOut, uint16_t msbMask, uint16_t mask);
-    inline unsigned int XModemCrc(uint8_t data[], uint8_t start, uint16_t length)
-    {
-        //  XModem parameters: poly=0x1021 init=0x0000 refin=false refout=false xorout=0x0000
-        return fastCrc(data, start, length, false, false, 0x1021, 0x0000, 0x0000, 0x8000, 0xffff);
-    }
-    inline unsigned int Mcrf4XX(uint8_t data[], uint8_t start, uint16_t length)
-    {
-        return fastCrc(data, start, length, true, true, 0x1021, 0xffff, 0x0000, 0x8000, 0xffff);
-    }
-    inline unsigned int Modbus(uint8_t data[], uint8_t start, uint16_t length)
-    {
-        return fastCrc(data, start, length, true, true, 0x8005, 0xffff, 0x0000, 0x8000, 0xffff);
-    }
+
+    void clearCrc();
+    void updateCrc(uint8_t data);
+    uint16_t getCrc();
+    unsigned int fastCrc(uint8_t data[], uint8_t start, uint16_t length, uint8_t reflectIn, uint8_t reflectOut, uint16_t polynomial, uint16_t xorIn, uint16_t xorOut, uint16_t msbMask, uint16_t mask);
+    unsigned int XModemCrc(uint8_t data[], uint8_t start, uint16_t length);
+    unsigned int Mcrf4XX(uint8_t data[], uint8_t start, uint16_t length);
+    unsigned int Modbus(uint8_t data[], uint8_t start, uint16_t length);
 };
 
 #endif
